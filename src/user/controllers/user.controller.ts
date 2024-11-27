@@ -1,6 +1,16 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { UserLoginRequest, UserRegisterRequest } from '../dto/user.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('/api/v1/users')
 export class UserController {
@@ -20,6 +30,16 @@ export class UserController {
     const user = await this.userService.login(request);
     return {
       data: user,
+    };
+  }
+
+  @Get('/current')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async current(@Req() req): Promise<any> {
+    const result = await this.userService.get(req.user.id);
+    return {
+      data: result,
     };
   }
 }

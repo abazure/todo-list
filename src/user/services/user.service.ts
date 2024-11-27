@@ -1,6 +1,7 @@
 import { UserRepository } from '../repositories/user.repository';
 import { ValidationService } from '../../common/validation.service';
 import {
+  GetUserResponse,
   UserLoginRequest,
   UserLoginResponse,
   UserRegisterRequest,
@@ -11,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -18,6 +20,7 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private validation: ValidationService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
   async register(request: UserRegisterRequest) {
     const registerRequest = this.validation.Validate(
@@ -58,11 +61,20 @@ export class UserService {
         id: record.id,
         username: record.username,
       },
-      { secret: 'testSecret', expiresIn: '1h' },
+      { secret: this.configService.get<string>('SECRET'), expiresIn: '1h' },
     );
 
     return {
       access_token: token,
     };
+  }
+
+  async get(request: string): Promise<GetUserResponse> {
+    const record = await this.userRepository.findById(request);
+    if (record == null) {
+      throw new HttpException('User not found', 404);
+    }
+    delete record.password;
+    return record;
   }
 }

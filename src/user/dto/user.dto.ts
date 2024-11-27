@@ -13,3 +13,9 @@ export interface UserLoginRequest {
 export interface UserLoginResponse {
   access_token: string;
 }
+
+export interface GetUserResponse {
+  id: string;
+  name: string;
+  username: string;
+}
