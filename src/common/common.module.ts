@@ -4,6 +4,8 @@ import * as winston from 'winston';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseService } from './database.service';
 import { ValidationService } from './validation.service';
+import { APP_FILTER } from '@nestjs/core';
+import { ErrorFilter } from './error.filter';
 
 @Global()
 @Module({
@@ -16,7 +18,14 @@ import { ValidationService } from './validation.service';
       isGlobal: true,
     }),
   ],
-  providers: [DatabaseService, ValidationService],
+  providers: [
+    DatabaseService,
+    ValidationService,
+    {
+      provide: APP_FILTER,
+      useClass: ErrorFilter,
+    },
+  ],
   exports: [DatabaseService, ValidationService],
 })
 export class CommonModule {}
